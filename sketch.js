@@ -1,3 +1,7 @@
+let serialPDM;
+let portName = "COM3";
+let sensor;
+
 const width = 400;
 const height = 600;
 const ground_height = 102;
@@ -8,6 +12,66 @@ let ground;
 let pipes = [];
 let gameState = 'wait';
 let score = 0;
+
+let dieSound = new Tone.Player("/assets/sfx_die.mp3").toDestination();
+let flapEffect = new Tone.Distortion({
+    "wet": 0.1,
+    "distortion": 0.9
+});
+let flapSound = new Tone.NoiseSynth({
+    noise: {
+        type: "white",
+        playbackRate: 0.4,
+        volume: -25,
+    },
+    envelope: {
+        attackCurve: "exponential",
+        attack: 0.01,
+        decay: 0,
+        sustain: 0,
+        release: 0.001
+    }
+}
+).connect(flapEffect).toDestination();
+
+let scoreEffect = new Tone.Chorus({
+    "frequency": 0.2,
+    "delayTime": 10,
+    "type": "sine",
+    "depth": 1,
+    "feedback": 0.45,
+    "spread": 180,
+    "wet": 0.5
+});
+let scoreSound = new Tone.FMSynth({
+    "harmonicity":8,
+    "volume": -20,
+    "modulationIndex": 2,
+    "oscillator" : {
+        "type": "sine"
+    },
+    "envelope": {
+        "attack": 0.001,
+        "decay": 2,
+        "sustain": 0.1,
+        "release": 2
+    },
+    "modulation" : {
+        "type" : "square"
+    },
+    "modulationEnvelope" : {
+        "attack": 0.002,
+        "decay": 0.2,
+        "sustain": 0,
+        "release": 0.1
+    }
+}).connect(scoreEffect).toDestination();
+
+let sound = [{"time": 0, "note": "E6"},
+            {"time": 0.2, "note": "F6"}];
+let part = new Tone.Part(function(time, note){
+    scoreSound.triggerAttackRelease(note, "8n", time);
+}, [[0, "E6"], [0.2, "F6"]]).start(0);
 
 function preload(){
     bgimg = loadImage("assets/flappy-bg.png");
@@ -43,17 +107,21 @@ function pipesCreate(){
         if(pipe.birdPassed(bird) && !pipe.passCount){
             score++;
             pipe.passCount = true;
+            Tone.Transport.start(Tone.now());
+            Tone.Transport.stop(Tone.now()+ 0.8);
         }
 
         if(pipe.birdCollided(bird) && !pipe.collided){
             gameState = 'end';
             console.log("collide");
             pipe.collided = true;
+            dieSound.start();
         }
     })
 }
 
 function mousePressed() {
+    flapSound.triggerAttackRelease("8n", Tone.now());
     bird.flap();
 }
 
@@ -229,11 +297,13 @@ class Bird{
         if(this.y + this.scaledHeight > height - ground_height){
             this.y = height - ground_height - this.scaledHeight / 2;
             gameState = 'end';
+            dieSound.start();
         }
         else if( this.y < 0)
         {
             this.y = 0;
             gameState = 'end';
+            dieSound.start();
         }
 
         this.rotation = map(this.jump_velocity, -10, 20, -0.7, 0.7);
