@@ -30,16 +30,26 @@ function setup() {
 
 function pipesCreate(){
     if(frameCount % 60 === 0){
-        let pipe = new Pipes();
+        pipe = new Pipes();
         pipes.push(pipe);
     }
 
-    for(i = 0; i < pipes.length; i++){
-        pipes[i].move();
-        if(pipes[i].off()) {
+    pipes.forEach((pipe, i) => {
+        pipe.move();
+        if(pipe.off()){
             pipes.splice(i, 1);
         }
-    }
+        
+        if(pipe.birdPassed(bird) && !pipe.passCount){
+            score++;
+            pipe.passCount = true;
+        }
+
+        if(pipe.birdCollided(bird)){
+            //gameState = 'end';
+            console.log("collide");
+        }
+    })
 }
 
 function mousePressed() {
@@ -60,12 +70,11 @@ function draw() {
         }
     }
     else if(gameState == 'playing'){
+        bird.show();
         pipesCreate();
         for(i = 0; i< pipes.length; i++){
             pipes[i].show();
         }
-
-        bird.show();
         textSize(20);
         text('Score: ' + score, 20, 20);
     }
@@ -81,7 +90,7 @@ function draw() {
             gameState = 'playing';
             score = 0;
             pipes = [];
-            bird.restart();
+            bird = new Bird();
         }
     }
 
@@ -123,14 +132,30 @@ class Pipes{
     constructor(){
         this.SCALE = 0.75;
         this.velocity = 4;
-        this.gap = 1;
+        this.gap = 50;
         this.x = width;
         this.y = random(180, 320);
+
+        this.passCount = false;
 
         this.scaledWidth = this.SCALE * pipeup_img.width;
         this.scaledHeight = this.SCALE * (pipeup_img.height - 150);
 
         this.topPos = this.y - this.scaledHeight - this.gap;
+    }
+
+    getLeftCorner(){
+        return this.x;
+    }
+    getPipeDownBottom(){
+        return this.topPos + this.scaledHeight;
+    }
+
+    getRightCorner(){
+        return this.x + this.scaledWidth;
+    }
+    getPipeUpBottom(){
+        return this.y + this.scaledHeight;
     }
 
     show(){
@@ -146,14 +171,33 @@ class Pipes{
         return this.x < -this.scaledWidth;
     }
 
-    birdHit(bird){
+    birdPassed(bird){
+        return bird.x > this.x + Math.floor(this.scaledWidth / 2);
+    }
 
+    birdCollided(bird){
+/*        let cx = bird.x + (bird.scaledHeight/2);
+        let cy = bird.y + (bird.scaledHeight/2);
+        let dia = bird.scaledHeight * 1.5;
+
+        let collidePipeTop = collideRectCircle(this.x, this.topPos, this.scaledWidth, this.scaledHeight, cx, cy, dia);
+        let collidePipeBottom = collideRectCircle(this.x, this.y, this.scaledWidth, this.scaledHeight, cx, cy, dia);
+
+        return collidePipeTop || collidePipeBottom;
+*/
+        if((bird.y < this.getPipeDownBottom()) || (bird.y > this.y)){
+            if((bird.x > this.x) && (bird.x < this.x + this.scaledWidth)){
+                return true;
+            }
+        }
+        else
+            return false;
     }
 }
 
 class Bird{
     constructor(){
-        this.scale = 0.5;
+        this.scale = 0.9;
         this.x = width/3;
         this.y = height/2;
         this.gravity = 0.9;
@@ -163,15 +207,12 @@ class Bird{
         this.scaledHeight = this.scale * birdsheet.height;
     }
 
-    restart(){
-        this.scale = 0.5;
-        this.x = width/3;
-        this.y = height/2;
-        this.gravity = 0.9;
-        this.jump_velocity = 0;
-        this.rotation = 0;
-        this.flap_strength = 15;
-        this.scaledHeight = this.scale * birdsheet.height;
+    getX(){
+        return this.x;
+    }
+
+    getY(){
+        return this.y;
     }
 
     flap(){
@@ -184,7 +225,7 @@ class Bird{
         imageMode(CENTER);
         translate(this.x, this.y);
         rotate(this.rotation);
-        image(birdsheet, 0, 0, (this.scale - 0.1) * birdsheet.width, this.scaledHeight, 60 * sx, 0, 60, 60);
+        image(birdsheet, 0, 0, this.scaledHeight, this.scaledHeight, 60 * sx, 0, 60, 60);
         pop();
     }
 
@@ -218,3 +259,29 @@ class Bird{
         return sx;
     }
 }
+
+collideRectCircle = function (rx, ry, rw, rh, cx, cy, diameter) {
+    //2d
+    // temporary variables to set edges for testing
+    let testX = cx;
+    let testY = cy;
+   // which edge is closest?
+    if (cx < rx) {
+    testX = rx; // left edge
+    } else if (cx > rx + rw) {
+    testX = rx + rw;
+    } // right edge
+   if (cy < ry) {
+    testY = ry; // top edge
+    } else if (cy > ry + rh) {
+    testY = ry + rh;
+    } // bottom edge
+   // // get distance from closest edges
+    var distance = this.dist(cx, cy, testX, testY);
+    console.log("dist:" + distance + ',' + "dia: " + diameter);
+   // if the distance is less than the radius, collision!
+    if (distance <= diameter) {
+    return true;
+    }
+    return false;
+   };
