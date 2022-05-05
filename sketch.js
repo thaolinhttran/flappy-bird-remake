@@ -90,11 +90,6 @@ function setup() {
     textFont(font);
     ground = new Ground();
     bird = new Bird();
-
-    document.querySelector('button')?.addEventListener('click', async () => {
-        await Tone.start()
-        console.log('audio is ready')
-    })
 }
 
 function pipesCreate(){
