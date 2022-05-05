@@ -13,7 +13,8 @@ let pipes = [];
 let gameState = 'wait';
 let score = 0;
 
-let dieSound = new Tone.Player("/assets/sfx_die.mp3").toDestination();
+let buffer = new Tone.Buffer("/assets/sfx_die.mp3");
+let dieSound = new Tone.Player(buffer).toDestination();
 let flapEffect = new Tone.Distortion({
     "wet": 0.1,
     "distortion": 0.9
