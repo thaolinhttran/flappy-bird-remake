@@ -16,7 +16,7 @@ let score = 0;
 let buffer = new Tone.Buffer("/assets/sfx_die.mp3", function(){
     let buff = buffer.get();
 });
-let dieSound = new Tone.Player(buff).toDestination();
+let dieSound = new Tone.Player(buffer).toDestination();
 let flapEffect = new Tone.Distortion({
     "wet": 0.1,
     "distortion": 0.9
