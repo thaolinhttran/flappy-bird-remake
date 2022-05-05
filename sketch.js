@@ -90,6 +90,11 @@ function setup() {
     textFont(font);
     ground = new Ground();
     bird = new Bird();
+
+    document.querySelector('button')?.addEventListener('click', async () => {
+        await Tone.start()
+        console.log('audio is ready')
+    })
 }
 
 function pipesCreate(){
@@ -131,7 +136,7 @@ function draw() {
     if(gameState == 'wait'){
         fill('#b16e4b');
         textSize(40);
-        text('FLAPPY BIRD', 80, 250);
+        text('SLEEPY BIRD', 80, 250);
         textSize(15);
         text('Press to start...', width/2 - 20, height/2);
         if(mouseIsPressed){
