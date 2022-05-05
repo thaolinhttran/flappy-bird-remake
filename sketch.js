@@ -45,9 +45,10 @@ function pipesCreate(){
             pipe.passCount = true;
         }
 
-        if(pipe.birdCollided(bird)){
-            //gameState = 'end';
+        if(pipe.birdCollided(bird) && !pipe.collided){
+            gameState = 'end';
             console.log("collide");
+            pipe.collided = true;
         }
     })
 }
@@ -60,7 +61,7 @@ function draw() {
     background(bgimg);
 
     if(gameState == 'wait'){
-        fill(255);
+        fill('#b16e4b');
         textSize(40);
         text('FLAPPY BIRD', 80, 250);
         textSize(15);
@@ -132,14 +133,15 @@ class Pipes{
     constructor(){
         this.SCALE = 0.75;
         this.velocity = 4;
-        this.gap = 50;
+        this.gap = 200;
         this.x = width;
-        this.y = random(180, 320);
+        this.y = random(230, 400);
 
         this.passCount = false;
+        this.collided = false;
 
         this.scaledWidth = this.SCALE * pipeup_img.width;
-        this.scaledHeight = this.SCALE * (pipeup_img.height - 150);
+        this.scaledHeight = this.SCALE * pipeup_img.height;
 
         this.topPos = this.y - this.scaledHeight - this.gap;
     }
@@ -153,9 +155,6 @@ class Pipes{
 
     getRightCorner(){
         return this.x + this.scaledWidth;
-    }
-    getPipeUpBottom(){
-        return this.y + this.scaledHeight;
     }
 
     show(){
@@ -176,19 +175,12 @@ class Pipes{
     }
 
     birdCollided(bird){
-/*        let cx = bird.x + (bird.scaledHeight/2);
-        let cy = bird.y + (bird.scaledHeight/2);
-        let dia = bird.scaledHeight * 1.5;
-
-        let collidePipeTop = collideRectCircle(this.x, this.topPos, this.scaledWidth, this.scaledHeight, cx, cy, dia);
-        let collidePipeBottom = collideRectCircle(this.x, this.y, this.scaledWidth, this.scaledHeight, cx, cy, dia);
-
-        return collidePipeTop || collidePipeBottom;
-*/
-        if((bird.y < this.getPipeDownBottom()) || (bird.y > this.y)){
+        if(bird.y < this.getPipeDownBottom() || bird.y > this.y){
             if((bird.x > this.x) && (bird.x < this.x + this.scaledWidth)){
                 return true;
             }
+            else
+                return false;
         }
         else
             return false;
@@ -259,29 +251,3 @@ class Bird{
         return sx;
     }
 }
-
-collideRectCircle = function (rx, ry, rw, rh, cx, cy, diameter) {
-    //2d
-    // temporary variables to set edges for testing
-    let testX = cx;
-    let testY = cy;
-   // which edge is closest?
-    if (cx < rx) {
-    testX = rx; // left edge
-    } else if (cx > rx + rw) {
-    testX = rx + rw;
-    } // right edge
-   if (cy < ry) {
-    testY = ry; // top edge
-    } else if (cy > ry + rh) {
-    testY = ry + rh;
-    } // bottom edge
-   // // get distance from closest edges
-    var distance = this.dist(cx, cy, testX, testY);
-    console.log("dist:" + distance + ',' + "dia: " + diameter);
-   // if the distance is less than the radius, collision!
-    if (distance <= diameter) {
-    return true;
-    }
-    return false;
-   };
