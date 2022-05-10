@@ -1,3 +1,6 @@
+//https://youtube.com/shorts/lrZNcRkdIEE?feature=share
+//Sleepy Bird - A Flappy Bird remake
+//Gameplay using Arduino push button. Game ends whenever bird hit pipes or top and bottom edge of the canvas.
 let serialPDM;
 let portName = "COM3";
 let sensor;
