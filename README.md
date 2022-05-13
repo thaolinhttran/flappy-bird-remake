@@ -33,3 +33,4 @@ Future Development Possibility:
 * Ultimate end game scence, possibly at score 1500 - 2000 as an Easter egg
 * Multiplayer game with 2 birds
 * Refine bird sprites with more facial expression
+* Fixing loose button on Arduino breadboard to guarantee pleasant gaming experience
